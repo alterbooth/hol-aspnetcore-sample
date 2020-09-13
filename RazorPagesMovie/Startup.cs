@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RazorPagesMovie.Models;
+using Microsoft.Extensions.Hosting;
 
 namespace RazorPagesMovie
 {
@@ -33,12 +34,17 @@ namespace RazorPagesMovie
             });
 
             services.AddDbContext<MovieContext>(options => options.UseSqlite(Configuration.GetConnectionString("MovieContext")));
-            services.AddMvc()
-            .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);       
+
+            services.AddRouting(options =>
+            {
+                options.LowercaseUrls = true;
+            });
+
+            services.AddRazorPages();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -53,12 +59,11 @@ namespace RazorPagesMovie
             app.UseStaticFiles();
             app.UseHttpsRedirection();
             app.UseCookiePolicy();
+            app.UseRouting();
 
-            app.UseMvc(routes =>
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
             });
         }
     }
